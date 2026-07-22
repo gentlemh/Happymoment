@@ -1,0 +1,820 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Happy Birthday!</title>
+  
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <!-- Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================
+       1. GLOBAL STYLES & RESET
+       ========================================== */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a1c4fd 100%);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #333;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Floating Hearts Particle Background Canvas */
+    #heartCanvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Section Control */
+    .step-section {
+      display: none;
+      min-height: 100vh;
+      width: 100%;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px 20px;
+      text-align: center;
+      position: relative;
+      z-index: 10;
+      box-sizing: border-box;
+    }
+
+    .step-section.active {
+      display: flex;
+      animation: fadeInUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.98); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    /* UI Headings & Typography */
+    h1 {
+      font-family: 'Dancing Script', cursive;
+      font-size: 3.5rem;
+      color: #ff2a6d;
+      text-shadow: 2px 2px 10px rgba(255, 42, 109, 0.2);
+      margin-bottom: 10px;
+    }
+
+    p.subtitle {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 25px;
+      max-width: 600px;
+      line-height: 1.6;
+    }
+
+    /* Button Styling */
+    .btn-next {
+      margin-top: 30px;
+      padding: 14px 38px;
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      background: linear-gradient(45deg, #ff416c, #ff4b2b);
+      border: none;
+      border-radius: 50px;
+      cursor: pointer;
+      box-shadow: 0 8px 25px rgba(255, 65, 108, 0.4);
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .btn-next:hover {
+      transform: translateY(-4px) scale(1.04);
+      box-shadow: 0 12px 30px rgba(255, 65, 108, 0.6);
+    }
+
+    /* ==========================================
+       STEP 1: GIFT BOX & HERO IMAGE LANDING
+       ========================================== */
+    .hero-image-wrapper {
+      margin: 15px 0 20px;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      overflow: hidden;
+      border: 5px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      animation: floatHero 4s ease-in-out infinite;
+    }
+
+    .hero-image-wrapper img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    @keyframes floatHero {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .gift-container {
+      position: relative;
+      cursor: pointer;
+      margin: 10px 0;
+      perspective: 1000px;
+    }
+
+    .gift-box-icon {
+      font-size: 90px;
+      display: inline-block;
+      animation: giftBounce 2s infinite ease-in-out;
+      filter: drop-shadow(0 15px 15px rgba(0,0,0,0.15));
+      transition: transform 0.3s ease;
+    }
+
+    .gift-container:hover .gift-box-icon {
+      transform: scale(1.15) rotate(5deg);
+    }
+
+    @keyframes giftBounce {
+      0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+      40% { transform: translateY(-20px) rotate(-3deg); }
+      60% { transform: translateY(-10px) rotate(3deg); }
+    }
+
+    /* ==========================================
+       STEP 2: ENVELOPE & BALLOONS
+       ========================================== */
+    .envelope-wrapper {
+      position: relative;
+      cursor: pointer;
+      margin: 20px 0;
+    }
+
+    .envelope {
+      width: 300px;
+      height: 200px;
+      background: #ff5252;
+      border-radius: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 700;
+      font-size: 1.4rem;
+      box-shadow: 0 15px 35px rgba(255, 82, 82, 0.35);
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.3s ease;
+    }
+
+    .envelope:hover {
+      transform: translateY(-5px) scale(1.02);
+    }
+
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      border-left: 150px solid transparent;
+      border-right: 150px solid transparent;
+      border-top: 100px solid #ff7979;
+    }
+
+    .balloon-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 5;
+    }
+
+    .balloon {
+      position: absolute;
+      bottom: -120px;
+      width: 60px;
+      height: 80px;
+      border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+      animation: floatUp 7s linear infinite;
+      opacity: 0.85;
+    }
+
+    .balloon::after {
+      content: "";
+      position: absolute;
+      bottom: -12px;
+      left: 28px;
+      width: 2px;
+      height: 16px;
+      background: rgba(0,0,0,0.2);
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(0) rotate(0deg); opacity: 0.9; }
+      100% { transform: translateY(-125vh) rotate(25deg); opacity: 0; }
+    }
+
+    /* ==========================================
+       STEP 3: CAKE & BLOWABLE CANDLE
+       ========================================== */
+    .cake-container {
+      margin: 40px auto 20px;
+      position: relative;
+      cursor: pointer;
+    }
+
+    .cake {
+      width: 180px;
+      height: 110px;
+      background: linear-gradient(to bottom, #f48fb1, #f06292);
+      border-radius: 15px 15px 5px 5px;
+      position: relative;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+    }
+
+    .cake::after {
+      content: '';
+      position: absolute;
+      top: 30px;
+      left: 0;
+      width: 100%;
+      height: 15px;
+      background: #fff;
+      border-radius: 10px;
+      opacity: 0.6;
+    }
+
+    .candle {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 14px;
+      height: 30px;
+      background: repeating-linear-gradient(45deg, #fff, #fff 5px, #ff4081 5px, #ff4081 10px);
+      border-radius: 3px;
+    }
+
+    .flame {
+      position: absolute;
+      top: -22px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 18px;
+      height: 26px;
+      background: radial-gradient(ellipse at bottom, #ffeb3b 0%, #ff9800 60%, transparent 100%);
+      border-radius: 50% 50% 20% 20%;
+      box-shadow: 0 0 20px #ff9800;
+      animation: flicker 0.6s infinite alternate;
+      transition: all 0.6s ease-out;
+    }
+
+    .flame.out {
+      opacity: 0;
+      transform: translateX(-50%) scale(0);
+      box-shadow: none;
+    }
+
+    @keyframes flicker {
+      0% { transform: translateX(-50%) scale(1); }
+      100% { transform: translateX(-50%) scale(1.15) rotate(2deg); }
+    }
+
+    .wish-card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 520px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+      margin-top: 20px;
+    }
+
+    /* ==========================================
+       STEP 4: INTERACTIVE DASHBOARD
+       ========================================== */
+    #step4 {
+      justify-content: flex-start;
+      padding-top: 50px;
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 25px;
+      width: 100%;
+      max-width: 1000px;
+      margin-top: 20px;
+    }
+
+    .dash-card {
+      background: rgba(255, 255, 255, 0.9);
+      backdrop-filter: blur(12px);
+      border-radius: 24px;
+      padding: 30px 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.06);
+      border: 1px solid rgba(255,255,255,0.6);
+      transition: transform 0.3s ease;
+    }
+
+    .dash-card:hover {
+      transform: translateY(-5px);
+    }
+
+    .counter-display {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #ff4081;
+      margin-top: 12px;
+    }
+
+    audio {
+      margin-top: 15px;
+      outline: none;
+      border-radius: 30px;
+    }
+
+    /* ==========================================
+       STEP 5 & 6: POLAROID GALLERY STACKS
+       ========================================== */
+    .gallery-container {
+      position: relative;
+      width: 100%;
+      max-width: 1050px;
+      display: flex;
+      justify-content: center;
+    }
+
+    .polaroid-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 25px;
+      justify-content: center;
+      width: 100%;
+      margin-top: 25px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .polaroid {
+      background: #ffffff;
+      padding: 15px 15px 30px 15px;
+      box-shadow: 0 12px 25px rgba(0,0,0,0.12);
+      border-radius: 6px;
+      transform: rotate(-3deg);
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      width: 220px;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .polaroid:nth-child(even) {
+      transform: rotate(3deg);
+    }
+
+    .polaroid:hover {
+      transform: scale(1.1) rotate(0deg);
+      z-index: 20;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+    }
+
+    .polaroid img {
+      width: 100%;
+      height: 190px;
+      object-fit: cover;
+      border-radius: 4px;
+    }
+
+    .polaroid .caption {
+      margin-top: 12px;
+      font-family: 'Dancing Script', cursive;
+      font-size: 1.3rem;
+      color: #444;
+      font-weight: bold;
+    }
+
+    /* Animated Sticker Styles */
+    .sticker {
+      position: absolute;
+      font-size: 2.2rem;
+      pointer-events: none;
+      z-index: 5;
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.15));
+    }
+
+    .sticker-bounce {
+      animation: stickerFloat 3s ease-in-out infinite alternate;
+    }
+
+    .sticker-spin {
+      animation: stickerSpin 6s linear infinite;
+    }
+
+    .sticker-pulse {
+      animation: stickerPulse 2s ease-in-out infinite;
+    }
+
+    .sticker-top-left { top: -20px; left: -15px; }
+    .sticker-top-right { top: -20px; right: -15px; }
+    .sticker-bottom-right { bottom: -15px; right: -10px; }
+    .sticker-bottom-left { bottom: -15px; left: -10px; }
+
+    @keyframes stickerFloat {
+      0% { transform: translateY(0) rotate(-5deg); }
+      100% { transform: translateY(-12px) rotate(10deg); }
+    }
+
+    @keyframes stickerSpin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    @keyframes stickerPulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.25) rotate(8deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Floating Heart Canvas Overlay -->
+  <canvas id="heartCanvas"></canvas>
+
+  <!-- Container for Balloons in Step 2 -->
+  <div class="balloon-container" id="balloonContainer"></div>
+
+  <!-- ==========================================
+       STEP 1: GIFT BOX & HERO IMAGE LANDING
+       ========================================== -->
+  <section id="step1" class="step-section active">
+    <h1>🎁 A Special Surprise Awaits!</h1>
+    <p class="subtitle">An interactive birthday experience created just for you.</p>
+
+    <div class="hero-image-wrapper">
+      <img src="images/intro.jpg" alt="Birthday Special">
+    </div>
+    
+    <div class="gift-container" onclick="nextStep(2)">
+      <div class="gift-box-icon">🎁</div>
+    </div>
+
+    <button class="btn-next" onclick="nextStep(2)">Unwrap Surprise ✨</button>
+  </section>
+
+  <!-- ==========================================
+       STEP 2: ENVELOPE & BALLOONS
+       ========================================== -->
+  <section id="step2" class="step-section">
+    <h1>🎉 Happy Birthday!</h1>
+    <p class="subtitle">Tap the card below to open your celebratory letter!</p>
+    
+    <div class="envelope-wrapper" onclick="nextStep(3)">
+      <div class="envelope">
+        ✉️ Open Letter
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="nextStep(3)">Continue to Wishes 💌</button>
+  </section>
+
+  <!-- ==========================================
+       STEP 3: BIRTHDAY CAKE & BLOW CANDLE
+       ========================================== -->
+  <section id="step3" class="step-section">
+    <h1>🎂 Make a Wish!</h1>
+    <p class="subtitle">(Blow into your microphone or tap the candle flame to blow it out!)</p>
+
+    <div class="cake-container" onclick="blowCandle()">
+      <div class="candle">
+        <div class="flame" id="flame"></div>
+      </div>
+      <div class="cake"></div>
+    </div>
+
+    <p id="wishMessage" style="font-weight: 700; color: #ff2a6d; min-height: 28px; font-size: 1.2rem; margin-top: 10px;"></p>
+
+    <div class="wish-card">
+      <h3 style="color: #ff4081; font-size: 1.5rem;"> DEAR NITA ✨</h3>
+      <p style="margin-top: 12px; line-height: 1.7; color: #555;">
+        Happy Birthday Girl! 🎉<br>
+        I hope your special day is filled with love and happiness.<br>
+        May you always stay healthy, kind, and strong.<br>
+        Keep smiling and never stop chasing your dreams.<br>
+        Wishing you success, peace, and many happy memories.<br>
+        Have an amazing birthday and a wonderful year ahead! 🎂💖
+      </p>
+    </div>
+
+    <button class="btn-next" onclick="nextStep(4)">Enter Beautiful Moments 🚀</button>
+  </section>
+
+  <!-- ==========================================
+       STEP 4: FULL INTERACTIVE DASHBOARD
+       ========================================== -->
+  <section id="step4" class="step-section">
+    <h1>🌟 Celebration DAYS Yeahh!!</h1>
+    <p class="subtitle">Your real-time stats & birthday soundtrack</p>
+
+    <div class="dashboard-grid">
+      <div class="dash-card">
+        <h3>⏰ Time Spent Spreading Joy</h3>
+        <div class="counter-display" id="ageCounter">Calculating...</div>
+      </div>
+
+      <div class="dash-card">
+        <h3>🎵 Birthday Song</h3>
+        <p style="font-size: 0.9rem; color: #666; margin-top: 5px;">Tune in to your special track</p>
+        <audio id="bgMusic" controls style="width: 100%;">
+          <source src="song.mp3" type="audio/mpeg">
+          Your browser does not support playing audio.
+        </audio>
+      </div>
+
+      <div class="dash-card">
+        <h3>💖 Today's Highlight</h3>
+        <p style="margin-top: 10px; color: #555; line-height: 1.5;">
+          Celebrating another YEARS of incredible memories, laughter, and accomplishments!
+        </p>
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="nextStep(5)">View Memory Gallery 📸</button>
+  </section>
+
+  <!-- ==========================================
+       STEP 5: POLAROID GALLERY - PART 1
+       ========================================== -->
+  <section id="step5" class="step-section">
+    <h1>📸 Memory Frame Stack</h1>
+    <p class="subtitle">Tap photos to view pinky moments ❤️</p>
+
+    <div class="gallery-container">
+      <div class="polaroid-gallery">
+        <div class="polaroid">
+          <span class="sticker sticker-top-left sticker-bounce">✨</span>
+          <img src="images/photo1.jpg" alt="Memory 1">
+          <div class="caption">Gorgeous Sweetie 🌟</div>
+        </div>
+
+        <div class="polaroid">
+          <span class="sticker sticker-top-right sticker-pulse">🎈</span>
+          <img src="images/photo2.jpg" alt="Memory 2">
+          <div class="caption">Smiling Angel 😊</div>
+        </div>
+
+        <div class="polaroid">
+          <span class="sticker sticker-bottom-right sticker-bounce">💖</span>
+          <img src="images/photo3.jpg" alt="Memory 3">
+          <div class="caption">Intelligent Girl 💖</div>
+        </div>
+
+        <div class="polaroid">
+          <span class="sticker sticker-top-left sticker-spin">⭐</span>
+          <img src="images/photo4.jpg" alt="Memory 4">
+          <div class="caption">Cheers to NITA! 🥂</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="nextStep(6)">More Memories ➡️</button>
+  </section>
+
+  <!-- ==========================================
+       STEP 6: POLAROID GALLERY - PART 2
+       ========================================== -->
+  <section id="step6" class="step-section">
+    <h1>📸 Memory Frame Stack (Part 2)</h1>
+    <p class="subtitle">More special moments celebrating your wonderful journey ✨</p>
+
+    <div class="gallery-container">
+      <div class="polaroid-gallery">
+        <div class="polaroid">
+          <span class="sticker sticker-top-right sticker-bounce">🌸</span>
+          <img src="images/photo5.jpg" alt="Memory 5">
+          <div class="caption">Pure Happiness 🌺</div>
+        </div>
+
+        <div class="polaroid">
+          <span class="sticker sticker-bottom-left sticker-pulse">🎉</span>
+          <img src="images/photo6.jpg" alt="Memory 6">
+          <div class="caption">Happy 20th Girl 🥳</div>
+        </div>
+
+        <div class="polaroid">
+          <span class="sticker sticker-top-left sticker-bounce">👑</span>
+          <img src="images/photo7.jpg" alt="Memory 7">
+          <div class="caption">Shining NITA 👑</div>
+        </div>
+
+        <div class="polaroid">
+          <span class="sticker sticker-bottom-right sticker-spin">✨</span>
+          <img src="images/photo8.jpg" alt="Memory 8">
+          <div class="caption">Forever Kind & Beauty 💎</div>
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-next" onclick="nextStep(1)">Replay Celebration 🔄</button>
+  </section>
+
+  <!-- ==========================================
+       JAVASCRIPT LOGIC
+       ========================================== -->
+  <script>
+    /* 1. STEP NAVIGATION CONTROLLER */
+    function nextStep(stepNumber) {
+      document.querySelectorAll('.step-section').forEach(sec => sec.classList.remove('active'));
+      const activeSec = document.getElementById(`step${stepNumber}`);
+      if (activeSec) activeSec.classList.add('active');
+
+      if (stepNumber === 2) {
+        spawnBalloons();
+        triggerConfetti();
+      } else if (stepNumber === 3) {
+        initMicrophoneBlow();
+      } else if (stepNumber === 4) {
+        const audio = document.getElementById('bgMusic');
+        if (audio) audio.play().catch(() => console.log('Autoplay blocked'));
+      } else if (stepNumber === 5 || stepNumber === 6) {
+        triggerConfetti();
+      }
+    }
+
+    /* 2. CONFETTI EFFECT */
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 }
+        });
+      }
+    }
+
+    /* 3. FLOATING BALLOONS */
+    function spawnBalloons() {
+      const container = document.getElementById('balloonContainer');
+      container.innerHTML = '';
+      const colors = ['#ff4081', '#ffeb3b', '#00e676', '#00b0ff', '#e040fb', '#ff7043'];
+
+      for (let i = 0; i < 30; i++) {
+        const balloon = document.createElement('div');
+        balloon.className = 'balloon';
+        balloon.style.left = Math.random() * 100 + 'vw';
+        balloon.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        balloon.style.animationDuration = (5 + Math.random() * 4) + 's';
+        balloon.style.animationDelay = (Math.random() * 2) + 's';
+        container.appendChild(balloon);
+      }
+    }
+
+    /* 4. BLOW CANDLE LOGIC */
+    let candleBlown = false;
+    function blowCandle() {
+      if (candleBlown) return;
+      const flame = document.getElementById('flame');
+      const message = document.getElementById('wishMessage');
+      
+      if (flame) {
+        flame.classList.add('out');
+        candleBlown = true;
+        if (message) message.innerText = "🎉 Your wish has been made! Candle blown out! 🎉";
+        triggerConfetti();
+      }
+    }
+
+    let micInitialized = false;
+    function initMicrophoneBlow() {
+      if (micInitialized) return;
+      micInitialized = true;
+
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+          .then(stream => {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            const mic = audioCtx.createMediaStreamSource(stream);
+            const analyser = audioCtx.createAnalyser();
+            analyser.fftSize = 256;
+            mic.connect(analyser);
+
+            const dataArray = new Uint8Array(analyser.frequencyBinCount);
+
+            function checkVolume() {
+              analyser.getByteFrequencyData(dataArray);
+              let average = dataArray.reduce((a, b) => a + b, 0) / dataArray.length;
+
+              if (average > 45) {
+                blowCandle();
+              }
+              if (!candleBlown) requestAnimationFrame(checkVolume);
+            }
+            checkVolume();
+          })
+          .catch(err => console.log('Mic disabled/not supported, tap-to-blow active.'));
+      }
+    }
+
+    /* 5. LIVE AGE COUNTER */
+    const birthDate = new Date('2006-07-22');
+    function updateAgeCounter() {
+      const now = new Date();
+      const diff = now - birthDate;
+
+      const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+      const years = (days / 365.25).toFixed(1);
+
+      const counterElem = document.getElementById('ageCounter');
+      if (counterElem) {
+        counterElem.innerText = `${years} Years (${days.toLocaleString()} Days)`;
+      }
+    }
+    setInterval(updateAgeCounter, 1000);
+    updateAgeCounter();
+
+    /* 6. FLOATING HEART BACKGROUND */
+    const canvas = document.getElementById('heartCanvas');
+    const ctx = canvas.getContext('2d');
+    let hearts = [];
+
+    function resizeCanvas() {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Heart {
+      constructor() {
+        this.reset();
+      }
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = canvas.height + 20;
+        this.size = Math.random() * 12 + 8;
+        this.speedY = Math.random() * 1.5 + 0.8;
+        this.speedX = Math.sin(Math.random() * Math.PI) * 0.5;
+        this.opacity = Math.random() * 0.5 + 0.3;
+      }
+      update() {
+        this.y -= this.speedY;
+        this.x += this.speedX;
+        if (this.y < -20) this.reset();
+      }
+      draw() {
+        ctx.save();
+        ctx.globalAlpha = this.opacity;
+        ctx.fillStyle = '#ff4081';
+        ctx.beginPath();
+        ctx.arc(this.x - this.size / 2, this.y, this.size / 2, 0, Math.PI, true);
+        ctx.arc(this.x + this.size / 2, this.y, this.size / 2, 0, Math.PI, true);
+        ctx.lineTo(this.x, this.y + this.size);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    for (let i = 0; i < 25; i++) hearts.push(new Heart());
+
+    function animateHearts() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      hearts.forEach(h => {
+        h.update();
+        h.draw();
+      });
+      requestAnimationFrame(animateHearts);
+    }
+    animateHearts();
+  </script>
+</body>
+</html>
